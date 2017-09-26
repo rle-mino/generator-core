@@ -34,6 +34,9 @@
 
     var PLUGIN_KEY_PREFIX = "PLUGIN-";
 
+    // Photoshop versions may not contain the patch version (example 19.0)
+    var PARTIAL_VERSION_REGEX = /^\d+\.\d+$/;
+
     // On Windows, the bullet character is sometimes replaced with the bell character BEL (0x07).
     // This causes Windows to make a beeping noise every time • is printed to the console.
     // Use · instead. This needs to happen before adding stdlog to not affect the log files.
@@ -78,7 +81,8 @@
             "o": "output",
             "f": "pluginfolder",
             "v": "verbose"
-        }).argv;
+        }).string("photoshopVersion")
+        .argv;
     
     if (argv.help) {
         console.log(optimist.help());
@@ -238,7 +242,10 @@
         }
         
         if (argv.photoshopVersion && typeof argv.photoshopVersion === "string") {
-            options.photoshopVersion = argv.photoshopVersion;
+            // append a patch version if photoshop doesn't include it (19.0 => 19.0.0)
+            options.photoshopVersion = PARTIAL_VERSION_REGEX.test(argv.photoshopVersion) ?
+                argv.photoshopVersion + ".0" :
+                argv.photoshopVersion;
         }
         if (argv.photoshopPath && typeof argv.photoshopPath === "string") {
             options.photoshopPath = argv.photoshopPath;
